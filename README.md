@@ -34,7 +34,7 @@
 
 ## 🧐 About <a name = "about"></a>
 
-A small python module to select a polygonal region of interest (ROI) in a given image that is stored as a Shape object. You can use this Shape object later to manipulate the polygon selected, you can extract the inner content from an image, calculate the histogram of the Shape, calculate the center of the shape, rotate the shape around its center, translate the shape.
+A small python module to select a polygonal region of interest (ROI) in a given image that is stored as a Shape object. You can use this Shape object later to manipulate the polygon selected. You can also extract the inner content from an image, calculate the histogram of the created shape, calculate the center of the shape, rotate the shape around its center, or translate the shape.
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
@@ -72,7 +72,7 @@ pip install polyroi
 
 ## 🎈 Usage <a name="usage"></a>
 
-Some time ago, I have looked for an efficient way to draw and manipulate polygons in python environment. But I didn't find anything useful for my case. I did find some that can draw and extrect a numpy array, but for the manipulation of shapes, I had to develop myself.
+Some time ago, I looked for an efficient tool to draw and manipulate polygons in a python environment. But I didn't find anything useful for my case. I did find some tools that can draw and extract a NumPy array, but as for the manipulation of shapes, I had to develop the logic myself. So I decided to create one.
 I was trying to implement the particle filter from [Part-Based Lumbar Vertebrae Tracking in Videofluoroscopy Using Particle Filter](https://dblp.org/rec/journals/ijcvip/GuelzimAN20). You can check the repository of how I did manage to work with this package.
 
 ``` python
