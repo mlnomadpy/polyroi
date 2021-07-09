@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="polyroi-skywolfmo",                     # This is the name of the package
-    version="0.0.1",                        # The initial release version
+    name="polyroi",                     # This is the name of the package
+    version="0.0.3",                        # The initial release version
     author="Taha Bouhsine",                     # Full name of the author
     author_email="skywolf.mo@gmail.com",
 
@@ -32,6 +32,6 @@ setuptools.setup(
 
     install_requires=[
         'numpy',
-        'cv2'
+        'opencv-python'
     ]                     # Install other dependencies if any
 )
