@@ -1,7 +1,7 @@
 from numpy import pi, array, cos, sin, dot
 import cv2 as cv
 import numpy as np
-from Point import Point
+from .Point import Point
 confirm_box = False
 draw_rectangle = False
 box_x = 0
