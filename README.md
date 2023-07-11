@@ -11,7 +11,9 @@
   [![GitHub Issues](https://img.shields.io/github/issues/skywolfmo/polyroi.svg)](https://github.com/skywolfmo/polyroi/issues)
   [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/skywolfmo/polyroi.svg)](https://github.com/skywolfmo/polyroi/pulls)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
-
+  [![Downloads](https://static.pepy.tech/badge/polyroi)](https://pepy.tech/project/polyroi)
+  [![Downloads](https://static.pepy.tech/badge/polyroi/month)](https://pepy.tech/project/polyroi)
+  [![Downloads](https://static.pepy.tech/badge/polyroi/week)](https://pepy.tech/project/polyroi)
 </div>
 
 ---
