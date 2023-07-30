@@ -14,6 +14,8 @@
   [![Downloads](https://static.pepy.tech/badge/polyroi)](https://pepy.tech/project/polyroi)
   [![Downloads](https://static.pepy.tech/badge/polyroi/month)](https://pepy.tech/project/polyroi)
   [![Downloads](https://static.pepy.tech/badge/polyroi/week)](https://pepy.tech/project/polyroi)
+  [![DOI](https://zenodo.org/badge/384454315.svg)](https://zenodo.org/badge/latestdoi/384454315)
+
 </div>
 
 ---
