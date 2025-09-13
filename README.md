@@ -40,6 +40,8 @@
 
 A small python module to select a polygonal region of interest (ROI) in a given image that is stored as a Shape object. You can use this Shape object later to manipulate the polygon selected. You can also extract the inner content from an image, calculate the histogram of the created shape, calculate the center of the shape, rotate the shape around its center, or translate the shape.
 
+**🚀 NEW: JAX-Enhanced Version** - Now powered by JAX numpy for improved performance and parallel processing capabilities!
+
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
 ``` python
@@ -60,11 +62,51 @@ while(1):
 cv.destroyAllWindows()
 ```
 
+## 🆕 New JAX-Enhanced Features
+
+### Parallel Processing
+Process multiple ROI shapes simultaneously for improved performance:
+
+``` python
+from polyroi import Shape
+import jax.numpy as jnp
+
+# Create multiple shapes
+shapes = [Shape([(0,0), (100,0), (100,100), (0,100)]) for _ in range(10)]
+
+# Rotate all shapes in parallel
+rotated_shapes = Shape.process_multiple_shapes_parallel(shapes, 'rotate', jnp.pi/4)
+
+# Translate all shapes in parallel  
+translated_shapes = Shape.process_multiple_shapes_parallel(shapes, 'translate', 50, 30)
+```
+
+### JAX Array Operations
+Leverage JAX's vectorized operations for advanced processing:
+
+``` python
+# Convert shape to JAX array for advanced operations
+shape_array = shape.to_array()  # Returns JAX array
+centroid = jnp.mean(shape_array, axis=0)
+distances = jnp.linalg.norm(shape_array - centroid, axis=1)
+```
+
+### GPU Acceleration
+All mathematical operations now use JAX numpy, enabling automatic GPU acceleration when available.
+
+## 📖 Examples
+
+Check out the `examples/` directory for comprehensive demonstrations:
+- `basic_jax_example.py` - Basic JAX-enhanced operations
+- `parallel_processing_example.py` - Parallel batch processing  
+- `image_processing_example.py` - Real-world image processing scenarios
+
 ### Prerequisites
 
 ``` shell
 pip install cv2
 pip install numpy
+pip install jax  # New: For enhanced performance and GPU acceleration
 ```
 
 ### Installing
@@ -125,7 +167,8 @@ cv.destroyAllWindows()
 
 
 ## ⛏️ Built Using <a name = "built_using"></a>
-- [Numpy](https://numpy.org/) - Numpy
+- [JAX](https://jax.readthedocs.io/) - High-performance numerical computing
+- [Numpy](https://numpy.org/) - Numpy  
 - [OpenCV](https://opencv.org/) - OpenCV
 
 ## ✍️ Authors <a name = "authors"></a>
