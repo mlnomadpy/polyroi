@@ -1,4 +1,5 @@
-from numpy import cos, sin, sqrt, arctan, array
+import jax.numpy as jnp
+from jax import vmap
 import cv2 as cv
 
 
@@ -9,7 +10,7 @@ class Point:
         self.round_point()
 
     def distance(self, point):
-        return sqrt((self.x - point.x)**2 + (self.y - point.y)**2)
+        return jnp.sqrt((self.x - point.x)**2 + (self.y - point.y)**2)
 
     def translate_x(self, x):
         self.x += x
@@ -25,29 +26,32 @@ class Point:
         self.rotate(theta)
 
     def rotate(self, theta):
-        self.x = self.x * cos(theta) - self.y * sin(theta)
-        self.y = self.x * sin(theta) + self.y * cos(theta)
+        old_x = self.x
+        self.x = self.x * jnp.cos(theta) - self.y * jnp.sin(theta)
+        self.y = old_x * jnp.sin(theta) + self.y * jnp.cos(theta)
         self.round_point()
 
     def to_cylindrical(self):
-        r = sqrt(self.x**2 + self.y**2)
-        theta = arctan(self.y/self.x)
+        r = jnp.sqrt(self.x**2 + self.y**2)
+        theta = jnp.arctan(self.y/self.x)
         return (r, theta)
 
     def from_cylindrical(self, r, theta):
-        self.x = r * cos(theta)
-        self.y = r * sin(theta)
+        self.x = r * jnp.cos(theta)
+        self.y = r * jnp.sin(theta)
         self.round_point()
 
     def round_point(self):
-        self.x = round(self.x)
-        self.y = round(self.y)
+        self.x = float(jnp.round(self.x))
+        self.y = float(jnp.round(self.y))
 
     def to_tuple(self):
         return (self.x, self.y)
 
     def draw_point(self, frame):
-        cv.circle(frame, self.to_tuple(), radius=1,
+        # Convert to integers for OpenCV
+        point_int = (int(self.x), int(self.y))
+        cv.circle(frame, point_int, radius=1,
                   color=(255, 0, 255), thickness=1)
 
     def __str__(self):
