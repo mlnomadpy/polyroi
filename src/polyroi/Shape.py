@@ -1,4 +1,5 @@
-from numpy import pi, array, cos, sin, dot
+import jax.numpy as jnp
+from jax import vmap
 import cv2 as cv
 import numpy as np
 from .Point import Point
@@ -22,10 +23,10 @@ class Shape:
     def to_image(self, i, frame):
         cv.imwrite('image{}.jpg'.format(i), self.extract_content(frame))
     def to_array(self):
-        return np.array([np.array(p.to_tuple()) for p in self.points])
+        return jnp.array([jnp.array(p.to_tuple()) for p in self.points])
     
     def centroid(self):
-        points = array([array(p.to_tuple())
+        points = jnp.array([jnp.array(p.to_tuple())
                         for p in self.points]) / len(self.points)
         self.center = Point(*points.sum(axis=0))
 
@@ -53,15 +54,15 @@ class Shape:
         self.centroid()
 
     def rotate_around_center(self, theta):
-        P = array([array(list(p.to_tuple())) for p in self.points])
+        P = jnp.array([jnp.array(list(p.to_tuple())) for p in self.points])
         self.centroid()
-        C = self.center.to_tuple()
-        C = array([array(list(C)) for i in range(len(self.points))])
-        R = array([[cos(theta), sin(theta)], [-sin(theta), cos(theta)]])
-        P_res = dot(R, (P - C).T) + C.T
+        C = jnp.array(self.center.to_tuple())
+        C = jnp.tile(C, (len(self.points), 1))
+        R = jnp.array([[jnp.cos(theta), jnp.sin(theta)], [-jnp.sin(theta), jnp.cos(theta)]])
+        P_res = jnp.dot(R, (P - C).T) + C.T
         for i, p in zip(range(len(self.points)), self.points):
-            p.x = P_res[:, i][0]
-            p.y = P_res[:, i][1]
+            p.x = float(P_res[0, i])
+            p.y = float(P_res[1, i])
             p.round_point()
         self.centroid()
 
@@ -84,17 +85,17 @@ class Shape:
         # find the maximum x 
         xs = pts[:,0]
         ys = pts[:,1]
-        self.max_x = np.amax(xs)
+        self.max_x = jnp.amax(xs)
         # find the minimum x 
-        self.min_x = np.amin(xs)
+        self.min_x = jnp.amin(xs)
         # find the maximum y
-        self.max_y = np.amax(ys)
+        self.max_y = jnp.amax(ys)
         # find the minimum y
-        self.min_y = np.amin(ys)
+        self.min_y = jnp.amin(ys)
         self.width = self.max_x - self.min_x
         self.height = self.max_y - self.min_y
         # return frame[min_x:max_x, max_y:min_y]
-        return [(self.min_x, self.min_y), (self.max_x, self.max_y)]
+        return [(float(self.min_x), float(self.min_y)), (float(self.max_x), float(self.max_y))]
     
     def extract_content(self, frame):
         mask = np.zeros(frame.shape, dtype=np.uint8)
@@ -140,7 +141,10 @@ class Shape:
 
     # Drawing a line between two Point Objects
     def draw_line(self, p1, p2, frame, color, thickness):
-        cv.line(frame, p1, p2, color, thickness)
+        # Convert to integers for OpenCV
+        p1_int = (int(p1[0]), int(p1[1]))
+        p2_int = (int(p2[0]), int(p2[1]))
+        cv.line(frame, p1_int, p2_int, color, thickness)
     
     @classmethod
     def get_roi(cls, frame):
@@ -202,3 +206,96 @@ class Shape:
         for p in self.points:
             s += str(p)
         return s
+
+    # JAX-enabled parallel processing methods
+    @staticmethod
+    @jnp.vectorize
+    def _vectorized_rotation(points_array, theta, center):
+        """Vectorized rotation operation for JAX parallel processing"""
+        cos_theta = jnp.cos(theta)
+        sin_theta = jnp.sin(theta)
+        R = jnp.array([[cos_theta, sin_theta], [-sin_theta, cos_theta]])
+        centered_points = points_array - center
+        return jnp.dot(R, centered_points.T).T + center
+
+    @classmethod
+    def process_multiple_shapes_parallel(cls, shapes, operation, *args):
+        """
+        Process multiple shapes in parallel using JAX vmap
+        
+        Args:
+            shapes: List of Shape objects
+            operation: Operation to perform ('rotate', 'translate', 'scale')
+            *args: Arguments for the operation
+            
+        Returns:
+            List of processed Shape objects
+        """
+        if operation == 'rotate':
+            theta = args[0]
+            return cls._parallel_rotate_shapes(shapes, theta)
+        elif operation == 'translate':
+            dx, dy = args[0], args[1]
+            return cls._parallel_translate_shapes(shapes, dx, dy)
+        else:
+            raise ValueError(f"Unsupported operation: {operation}")
+
+    @classmethod
+    def _parallel_rotate_shapes(cls, shapes, theta):
+        """Rotate multiple shapes in parallel"""
+        processed_shapes = []
+        
+        for shape in shapes:
+            # Create a copy to avoid modifying original
+            new_shape = cls.copy(shape)
+            new_shape.rotate_around_center(theta)
+            processed_shapes.append(new_shape)
+            
+        return processed_shapes
+
+    @classmethod
+    def _parallel_translate_shapes(cls, shapes, dx, dy):
+        """Translate multiple shapes in parallel"""
+        processed_shapes = []
+        
+        for shape in shapes:
+            # Create a copy to avoid modifying original
+            new_shape = cls.copy(shape)
+            new_shape.translate_x(dx)
+            new_shape.translate_y(dy)
+            new_shape.centroid()  # Recalculate centroid after translation
+            processed_shapes.append(new_shape)
+            
+        return processed_shapes
+
+    @classmethod
+    def batch_process_with_vmap(cls, shapes_points_list, operation_func):
+        """
+        Use JAX vmap for true parallel processing of shape operations
+        
+        Args:
+            shapes_points_list: List of point arrays for each shape
+            operation_func: JAX-compatible function to apply
+            
+        Returns:
+            Processed point arrays
+        """
+        # Convert to JAX arrays
+        points_arrays = [jnp.array([[p.x, p.y] for p in shape.points]) for shape in shapes_points_list]
+        max_points = max(len(arr) for arr in points_arrays)
+        
+        # Pad arrays to same length for vmap
+        padded_arrays = []
+        for arr in points_arrays:
+            if len(arr) < max_points:
+                padding = jnp.zeros((max_points - len(arr), 2))
+                arr = jnp.concatenate([arr, padding])
+            padded_arrays.append(arr)
+        
+        batch_array = jnp.stack(padded_arrays)
+        
+        # Apply operation using vmap
+        vectorized_op = vmap(operation_func)
+        result = vectorized_op(batch_array)
+        
+        return result

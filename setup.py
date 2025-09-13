@@ -32,6 +32,8 @@ setuptools.setup(
 
     install_requires=[
         'numpy',
-        'opencv-python'
+        'opencv-python',
+        'jax',
+        'jaxlib'
     ]                     # Install other dependencies if any
 )
